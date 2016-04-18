@@ -142,6 +142,18 @@ Create an issue in the Github project.
 We use this internally and we intend for it to be a lightweight implementation
 so keep that in mind. If you want to do an ambitious rebuild, go for it.
 
+## About
+
+This project was inspired by a similar (but much more complex) deployment
+system used by one of our clients. We wanted a lighter solution for our other
+projects.
+
+The word Katli means "slice". It is used in the name of our favorite Indian
+sweet: Kaju Katli (cachew slices). Hopefully you will enjoy this little slice
+of Docker!
+
+Author of this project is Ryan Weal of Kafei Interactive Inc. (Canada).
+
 ## Other Projects
 
 If you want a gui-based solution consider Kalabox https://github.com/kalabox/kalabox
