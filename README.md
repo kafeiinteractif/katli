@@ -34,28 +34,38 @@ You can clone your git repo under the "repos" folder, or use SVN, CVS, or
 whatever version control you are familiar with.
 
 It is recommended to run `./deploy project new` ... where "project" is the name
-of your project. This creates the necessary files structure for you.
+of your project. This creates the necessary files structure for you, including
+your repos/project folder. Once that is done you will probably want a
+settings.php configuration, but it is optional. Read the next section for
+details on that.
 
-Give your project a short name that you will be comfortable typing a lot.
+Be sure to give your project a short name that you will be comfortable typing a
+lot.
 
 NOTE: the name you give to the repos/project folder will be the same name as
 your database imports, files directory, etc.
 
-#### 4. If you are importing a database, put that in the /sql folder
+#### 4. Configure database. If importing a database, put that in the /sql folder.
 
 The file will be called project.sql.gz (and yes, it must be gzipped).
 
 As an option you may also provide project_legacy.sql.gz (this will be useful if
 you plan on doing migrations).
 
+To populate the project.settings.php file do this:
+
+`./deploy project init d7` or:
+
+`./deploy project init d8`
+
 Database defaults are as follows:
 
-Name: project
+Database name: project
 User: root
 Password: my-secret-pw (configurable... see below)
 Host: db
 
-Name: project_legacy
+Database name: project_legacy
 User: root
 Password: my-secret-pw
 Host: db
