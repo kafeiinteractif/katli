@@ -1,0 +1,46 @@
+# Some cool things here.
+version: '2'
+
+services:
+  php7:
+    hostname: katli
+    image: kafei/d7p7
+    ports:
+      - "80"
+    volumes:
+      - "./repos/${COMPOSE_PROJECT_NAME}:/var/www/html"
+      - "./settings/${COMPOSE_PROJECT_NAME}.settings.php:/var/www/html/sites/default/settings.php"
+      - "./settings/${COMPOSE_PROJECT_NAME}.services.yml:/var/www/html/sites/default/services.yml"
+      - "./repos/${COMPOSE_PROJECT_NAME}/sites/default/default.settings.php:/var/www/html/sites/default/default.settings.php"
+      - "./repos/${COMPOSE_PROJECT_NAME}/sites/default/default.services.yml:/var/www/html/sites/default/default.services.yml"
+      - "./files/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/files"
+      - "./files/${COMPOSE_PROJECT_NAME}_legacy:/var/www/html/sites/default/files_legacy"
+      - "./config/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/config"
+    depends_on:
+      - db
+  php56:
+    hostname: katli
+    image: kafei/d7p56
+    ports:
+      - "80"
+    volumes:
+      - "./repos/${COMPOSE_PROJECT_NAME}:/var/www/html"
+      - "./settings/${COMPOSE_PROJECT_NAME}.settings.php:/var/www/html/sites/default/settings.php"
+      - "./settings/${COMPOSE_PROJECT_NAME}.services.yml:/var/www/html/sites/default/services.yml"
+      - "./repos/${COMPOSE_PROJECT_NAME}/sites/default/default.settings.php:/var/www/html/sites/default/default.settings.php"
+      - "./repos/${COMPOSE_PROJECT_NAME}/sites/default/default.services.yml:/var/www/html/sites/default/default.services.yml"
+      - "./files/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/files"
+      - "./files/${COMPOSE_PROJECT_NAME}_legacy:/var/www/html/sites/default/files_legacy"
+      - "./config/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/config"
+    depends_on:
+      - db
+  db:
+    hostname: db
+    image: mysql:latest
+    ports:
+      - "3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=my-secret-pw
+    volumes:
+      - "./sql:/var/sql"
+      - "./src/my.cnf:/etc/mysql/conf.d/katli.cnf"

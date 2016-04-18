@@ -1,0 +1,155 @@
+#!/bin/bash
+
+# Simple deployment script to configure Docker-based environments for Drupal sites.
+#
+# Usage:
+# ./deploy <sitename>          # brings you into a console
+#
+# Setup:
+# ./deploy <sitename> new      # creates folders and files for your site
+# ./deploy <sitename> init d7  # create a <sitename>.settings.php for the site (do this after you cloned repo)
+#
+# Work (run init before these, after checking out repo):
+# ./deploy <sitename> si       # run the site installer
+# ./deploy <sitename> db       # import the sql/<sitename>.sql and sql/<sitename_legacy.sql databases
+#
+# Debug:
+# ./deploy <sitename> xx       # delete the DB so you can run a fresh db import later
+
+SITE=$1
+MYSQL_PWD='my-secret-pw'
+SALT=`date | sha256sum` # for Drupal 8. You may want to replace this.
+
+# new site (creates placeholders only)
+if [[ "$2" == "new" ]];
+then
+  mkdir repos/${SITE}
+  touch sql/${SITE}.sql.gz
+  touch sql/${SITE}_legacy.sql.gz
+  mkdir files/${SITE}
+  mkdir config/${SITE}
+  echo
+  echo "Checkout your files under repos/${SITE} then run ./deploy ${SITE} init d7."
+  exit
+fi
+
+# init site (creates settings.php and services.yml)
+if [[ "$2" == "init" ]];
+then
+
+  # remove old settings, copy fresh from defaults
+  rm -Rf ./settings/${SITE}.settings.php
+  rm -Rf ./settings/${SITE}.services.yml
+  cp ./repos/${SITE}/sites/default/default.settings.php ./settings/${SITE}.settings.php
+  cp ./repos/${SITE}/sites/default/default.services.yml ./settings/${SITE}.services.yml
+
+  # drupal 7 specifics
+  if [[ "$3" == "d7" ]];
+  then
+    echo "
+\$databases['default']['default'] = array(
+  'driver' => 'mysql',
+  'database' => '${SITE}',
+  'username' => 'root',
+  'password' => '${MYSQL_PWD}',
+  'host' => 'db',
+  'prefix' => '',
+);
+\$conf['file_public_path'] = 'sites/default/files';
+\$conf['file_temporary_path'] = '/tmp';
+    " >> ./settings/${SITE}.settings.php
+  fi
+
+  # drupal 8 specifics
+  if [[ "$3" == "d8" ]];
+  then
+    echo "
+\$databases['default']['default'] = array (
+  'database' => '${SITE}',
+  'username' => 'root',
+  'password' => '${MYSQL_PWD}',
+  'prefix' => '',
+  'host' => 'db',
+  'port' => '3306',
+  'namespace' => 'Drupal\\Core\\Database\\Driver\\mysql',
+  'driver' => 'mysql',
+);
+\$config_directories['sync'] = 'sites/default/config';
+\$settings['hash_salt'] = '${SALT}';
+    " >> ./settings/${SITE}.settings.php
+    echo "NOTE: you will most certainly want to run ./deploy si next for Drupal 8 sites"
+  fi
+  chmod 777 -R files/${SITE}
+  chmod 777 -R config/${SITE}
+  echo
+  echo "Initialization complete, you may now use si/db commands."
+  exit
+fi
+
+# delete DB
+if [[ "$2" == "xx" ]];
+then
+  docker exec -ti ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE}"
+  docker exec -ti ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE}_legacy"
+fi
+
+# make sure the DB always exists
+docker exec -ti ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}" 2>&1 >/dev/null
+docker exec -ti ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}_legacy" 2>&1 >/dev/null
+
+# run site install with standard profile
+if [[ "$2" == "si" ]];
+then
+  echo "Installing Drupal on $DRUPAL_IP"
+  docker exec -ti ${SITE}_php7_1 /bin/bash -c "cd /var/www/html && /usr/local/bin/drush si standard -y"
+  echo
+  docker exec -ti ${SITE}_php7_1 /bin/bash -c 'cd /var/www/html && drush uli'
+  # @todo set settings.php and services.yml to 444
+fi
+
+# load the DB, and a legacy DB to import from if present
+if [[ "$2" == "db" ]];
+then
+  echo "Importing db..."
+  docker exec -ti ${SITE}_db_1 /bin/bash -c "zcat /var/sql/${SITE}.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}"
+  echo "Importing legacy..."
+  docker exec -ti ${SITE}_db_1 /bin/bash -c "zcat /var/sql/${SITE}_legacy.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}_legacy"
+  echo "Running update hooks..."
+  docker exec -ti ${SITE}_php7_1 /bin/bash -c 'cd /var/www/html && drush updb'
+  echo
+  echo  "Make sure to revert features or drush cim now if appropriate <--"
+  docker exec -ti ${SITE}_php7_1 /bin/bash -c 'cd /var/www/html && drush uli'
+fi
+
+# show the user how to connect
+echo
+echo "PHP 7 Connect info:"
+echo
+echo "If hosted in Linux server is at: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Networks}} {{$p}} -> {{$conf.IPAddress}} {{end}}' ${SITE}_php7_1`"
+echo "If hosted in a VM use your docker-machine or boot2docker IP and this port: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}' ${SITE}_php7_1`"
+echo
+echo "PHP 5.6 Connect info:"
+echo
+echo "If hosted in Linux server is at: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Networks}} {{$p}} -> {{$conf.IPAddress}} {{end}}' ${SITE}_php56_1`"
+echo "If hosted in a VM use your docker-machine or boot2docker IP and this port: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}' ${SITE}_php56_1`"
+
+# launch a console
+echo '
+ ________________________________________ 
+/ welcome to kafei katli! docker for any \
+| drupal site, with drush and drupal     |
+\ console <3                             /
+ ---------------------------------------- 
+    \
+     \
+      \     
+                    ##        .            
+              ## ## ##       ==            
+           ## ## ## ##      ===            
+       /""""""""""""""""___/ ===        
+  ~~~ {~~ ~~~~ ~~~ ~~~~ ~~ ~ /  ===- ~~~   
+       \______ o          __/            
+        \    \        __/             
+          \____\______/ '
+
+docker exec -ti ${SITE}_php7_1 /bin/bash
