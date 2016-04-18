@@ -136,9 +136,9 @@ echo "If hosted in a VM use your docker-machine or boot2docker IP and this port:
 # launch a console
 echo '
  ________________________________________ 
-/ welcome to kafei katli! docker for any \
-| drupal site, with drush and drupal     |
-\ console <3                             /
+/ welcome to kafei katli!                \
+| drush and drupal console are ready.    |
+\ have fun! <3                           /
  ---------------------------------------- 
     \
      \
