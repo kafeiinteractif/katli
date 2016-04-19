@@ -27,7 +27,9 @@ then
   touch sql/${SITE}.sql.gz
   touch sql/${SITE}_legacy.sql.gz
   mkdir files/${SITE}
+  chmod 777 -R files/${SITE}
   mkdir config/${SITE}
+  chmod 777 -R config/${SITE}
   echo
   echo "Checkout your files under repos/${SITE} then run ./deploy ${SITE} init d7."
   exit
@@ -79,8 +81,6 @@ then
     " >> ./settings/${SITE}.settings.php
     echo "NOTE: you will most certainly want to run ./deploy si next for Drupal 8 sites"
   fi
-  chmod 777 -R files/${SITE}
-  chmod 777 -R config/${SITE}
   echo
   echo "Initialization complete, you may now use si/db commands."
   exit

@@ -9,6 +9,7 @@ services:
       - "80"
     volumes:
       - "./repos/${COMPOSE_PROJECT_NAME}:/var/www/html"
+      - "./settings/default:/var/www/html/sites/default"
       - "./settings/${COMPOSE_PROJECT_NAME}.settings.php:/var/www/html/sites/default/settings.php"
       - "./settings/${COMPOSE_PROJECT_NAME}.services.yml:/var/www/html/sites/default/services.yml"
       - "./repos/${COMPOSE_PROJECT_NAME}/sites/default/default.settings.php:/var/www/html/sites/default/default.settings.php"
@@ -25,6 +26,7 @@ services:
       - "80"
     volumes:
       - "./repos/${COMPOSE_PROJECT_NAME}:/var/www/html"
+      - "./settings/default:/var/www/html/sites/default"
       - "./settings/${COMPOSE_PROJECT_NAME}.settings.php:/var/www/html/sites/default/settings.php"
       - "./settings/${COMPOSE_PROJECT_NAME}.services.yml:/var/www/html/sites/default/services.yml"
       - "./repos/${COMPOSE_PROJECT_NAME}/sites/default/default.settings.php:/var/www/html/sites/default/default.settings.php"
