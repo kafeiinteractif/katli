@@ -40,10 +40,11 @@ if [[ "$2" == "init" ]];
 then
 
   # remove old settings, copy fresh from defaults
-  rm -Rf ./settings/${SITE}.settings.php
-  rm -Rf ./settings/${SITE}.services.yml
-  cp ./repos/${SITE}/sites/default/default.settings.php ./settings/${SITE}.settings.php
-  cp ./repos/${SITE}/sites/default/default.services.yml ./settings/${SITE}.services.yml
+  mkdir ./settings/${SITE}
+  rm -Rf ./settings/${SITE}/settings.php
+  rm -Rf ./settings/${SITE}/services.yml
+  cp ./repos/${SITE}/sites/default/default.settings.php ./settings/${SITE}/settings.php
+  cp ./repos/${SITE}/sites/default/default.services.yml ./settings/${SITE}/services.yml
 
   # drupal 7 specifics
   if [[ "$3" == "d7" ]];
@@ -59,7 +60,7 @@ then
 );
 \$conf['file_public_path'] = 'sites/default/files';
 \$conf['file_temporary_path'] = '/tmp';
-    " >> ./settings/${SITE}.settings.php
+    " >> ./settings/${SITE}/settings.php
   fi
 
   # drupal 8 specifics
@@ -78,8 +79,17 @@ then
 );
 \$config_directories['sync'] = 'sites/default/config';
 \$settings['hash_salt'] = '${SALT}';
-    " >> ./settings/${SITE}.settings.php
+    " >> ./settings/${SITE}/settings.php
     echo "NOTE: you will most certainly want to run ./deploy si next for Drupal 8 sites"
+  fi
+  if [[ -z "$3" ]];
+  then
+    echo
+    echo "You forgot to specify d7 or d8 as your last parameter. You will have to conifgure your settings/${SITE}/settings.php manually or run this command again."
+    echo "Databases: ${SITE} and ${SITE}_legacy"
+    echo "username: root"
+    echo "password: ${MYSQL_PWD}"
+    echo "host: db"
   fi
   echo
   echo "Initialization complete, you may now use si/db commands."

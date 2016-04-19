@@ -52,7 +52,7 @@ The file will be called project.sql.gz (and yes, it must be gzipped).
 As an option you may also provide project_legacy.sql.gz (this will be useful if
 you plan on doing migrations).
 
-To populate the project.settings.php file do this:
+To populate the settings/project/settings.php file do this:
 
 `./deploy project init d7` or:
 
@@ -70,7 +70,7 @@ User: root
 Password: my-secret-pw
 Host: db
 
-Note: project is also the name of your repo, files folder, and project.settings.php, etc...
+Note: project is also the name of your repo, files folder, and settings/project/settings.php, etc...
 
 #### 5. Now start your environment!
 
@@ -87,7 +87,8 @@ console at the docroot. Drush and Drupal Console are pre-installed.
 `./deploy project init d7` (or d8)
 
 This will try to create a settings.php for your project. You can create one
-yourself as project.settings.php (and project.services.yml for Drupal8 sites).
+yourself as settings/project/settings.php (and project.services.yml for Drupal8
+sites).
 
 `./deploy project si`
 
