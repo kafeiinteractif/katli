@@ -87,8 +87,8 @@ console at the docroot. Drush and Drupal Console are pre-installed.
 `./deploy project init d7` (or d8)
 
 This will try to create a settings.php for your project. You can create one
-yourself as settings/project/settings.php (and project.services.yml for Drupal8
-sites).
+yourself as settings/project/settings.php (and settings/project/services.yml
+for Drupal8 sites).
 
 `./deploy project si`
 
