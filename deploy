@@ -23,12 +23,10 @@ SALT=`date | sha256sum` # for Drupal 8. You may want to replace this.
 # new site (creates placeholders only)
 if [[ "$2" == "new" ]];
 then
-  mkdir repos/${SITE}
-  touch sql/${SITE}.sql.gz
-  touch sql/${SITE}_legacy.sql.gz
-  mkdir files/${SITE}
+  mkdir -p repos/${SITE}
+  mkdir -p files/${SITE}
   chmod 777 -R files/${SITE}
-  mkdir config/${SITE}
+  mkdir -p config/${SITE}
   chmod 777 -R config/${SITE}
   echo
   echo "Checkout your files under repos/${SITE} then run ./deploy ${SITE} init d7."
@@ -40,7 +38,7 @@ if [[ "$2" == "init" ]];
 then
 
   # remove old settings, copy fresh from defaults
-  mkdir ./settings/${SITE}
+  mkdir -p ./settings/${SITE}
   rm -Rf ./settings/${SITE}/settings.php
   rm -Rf ./settings/${SITE}/services.yml
   cp ./repos/${SITE}/sites/default/default.settings.php ./settings/${SITE}/settings.php
