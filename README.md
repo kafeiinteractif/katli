@@ -10,6 +10,7 @@ Reasons why you may want to use Katli:
 
 * easily load development and legacy databases for doing migrations;
 * test your site in either (or both) of php 5.6 and php 7, side-by-side;
+* drush and drupal console are pre-installed by default;
 * low overhead on Linux hosts: should work on systems with only 1gb of ram;
 * no need to run local apache/nginx and mysql 24/7 on your development machine;
 * able to run as a server-based development environment;
