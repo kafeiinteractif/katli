@@ -6,6 +6,16 @@ sites using the latest Docker tools. It presumes very little about your repo,
 and it can run on your local machine or in a server environment if you prefer
 to develop in the cloud.
 
+Reasons why you may want to use Katli:
+
+* easily load development and legacy databases for doing migrations;
+* test your site in either (or both) of php 5.6 and php 7, side-by-side;
+* low overhead on Linux hosts: should work on systems with only 1gb of ram;
+* no need to run local apache/nginx and mysql 24/7 on your development machine;
+* able to run as a server-based development environment;
+* to learn docker in a way that doesn't do too much abstraction but takes care
+  of the boring routine tasks.
+
 ## Installation
 
 #### 1. Install docker and docker-compose.
