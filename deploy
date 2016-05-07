@@ -160,4 +160,9 @@ echo '
         \    \        __/             
           \____\______/ '
 
-docker exec -ti ${SITE}_php7_1 /bin/bash
+
+# only go interactive if you have a shell, otherwise assume testing
+if [[ -v TERM ]];
+then
+  docker exec -ti ${SITE}_php7_1 /bin/bash
+fi
