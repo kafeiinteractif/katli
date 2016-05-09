@@ -7,18 +7,24 @@
 #
 # Setup:
 # ./deploy <sitename> new      # creates folders and files for your site
-# ./deploy <sitename> init d7  # create a <sitename>.settings.php for the site (do this after you cloned repo)
+# ./deploy <sitename> init d7  # create a settings/<sitename>/settings.php for
+#                              # the site (do this after you cloned repo)
 #
 # Work (run init before these, after checking out repo):
 # ./deploy <sitename> si       # run the site installer
-# ./deploy <sitename> db       # import the sql/<sitename>.sql and sql/<sitename_legacy.sql databases
+# ./deploy <sitename> db       # import the sql/<sitename>.sql.gz and
+#                              # sql/<sitename_legacy.sql.gz databases
 #
 # Debug:
 # ./deploy <sitename> xx       # delete the DB so you can run a fresh db import later
+#
+# Start:
+# COMPOSE_PROJECT_NAME=project docker-compose up
 
 SITE=$1
-MYSQL_PWD='my-secret-pw'
+MYSQL_PWD='my-secret-pw' # also change this value in docker-compose.yml
 SALT=`date | sha256sum` # for Drupal 8. You may want to replace this.
+KATLI_SHELL='php7' # if you have troubles with Drupal 7 use "php56"
 
 # new site (creates placeholders only)
 if [[ "$2" == "new" ]];
@@ -83,7 +89,7 @@ then
   if [[ -z "$3" ]];
   then
     echo
-    echo "You forgot to specify d7 or d8 as your last parameter. You will have to conifgure your settings/${SITE}/settings.php manually or run this command again."
+    echo "You did not specify d7 or d8 as your last parameter. You will have to conifgure your settings/${SITE}/settings.php manually or run this command again."
     echo "Databases: ${SITE} and ${SITE}_legacy"
     echo "username: root"
     echo "password: ${MYSQL_PWD}"
@@ -97,36 +103,52 @@ fi
 # delete DB
 if [[ "$2" == "xx" ]];
 then
-  docker exec -ti ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE}"
-  docker exec -ti ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE}_legacy"
+  docker exec -t ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE} --force"
+  docker exec -t ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE}_legacy --force"
 fi
 
 # make sure the DB always exists
-docker exec -ti ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}" 2>&1 >/dev/null
-docker exec -ti ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}_legacy" 2>&1 >/dev/null
+docker exec -t ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}" 2>&1 >/dev/null
+docker exec -t ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}_legacy" 2>&1 >/dev/null
 
 # run site install with standard profile
 if [[ "$2" == "si" ]];
 then
-  echo "Installing Drupal on $DRUPAL_IP"
-  docker exec -ti ${SITE}_php7_1 /bin/bash -c "cd /var/www/html && /usr/local/bin/drush si standard -y"
-  echo
-  docker exec -ti ${SITE}_php7_1 /bin/bash -c 'cd /var/www/html && drush uli'
+  echo "Installing Drupal..."
+  if [[ -a ./settings/${SITE}/settings.php ]]
+  then
+    echo "Running installer:"
+    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c "cd /var/www/html && /usr/local/bin/drush si standard -y"
+    echo "Login URL:"
+    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush uli'
+  else
+    echo "The settings.php file has not been created. Stop your docker instances and run ./deploy ${SITE} init d8 # or d7 if you wish"
+  fi
   # @todo set settings.php and services.yml to 444
 fi
 
 # load the DB, and a legacy DB to import from if present
 if [[ "$2" == "db" ]];
 then
-  echo "Importing db..."
-  docker exec -ti ${SITE}_db_1 /bin/bash -c "zcat /var/sql/${SITE}.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}"
-  echo "Importing legacy..."
-  docker exec -ti ${SITE}_db_1 /bin/bash -c "zcat /var/sql/${SITE}_legacy.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}_legacy"
-  echo "Running update hooks..."
-  docker exec -ti ${SITE}_php7_1 /bin/bash -c 'cd /var/www/html && drush updb'
-  echo
-  echo  "Make sure to revert features or drush cim now if appropriate <--"
-  docker exec -ti ${SITE}_php7_1 /bin/bash -c 'cd /var/www/html && drush uli'
+  if [[ -a ./sql/${SITE}.sql.gz ]]
+  then
+    echo "Importing db..."
+    docker exec -t ${SITE}_db_1 /bin/bash -c "zcat /var/sql/${SITE}.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}"
+    echo "Running update hooks..."
+    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush updb'
+    echo
+    echo  "Make sure to revert features or drush cim now if appropriate <--"
+    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush uli'
+  else
+    echo "Could not find sql/${SITE}.sql.gz"
+  fi
+  if [[ -a ./sql/${SITE}_legacy.sql.gz ]]
+  then
+    echo "Importing legacy..."
+    docker exec -t ${SITE}_db_1 /bin/bash -c "zcat /var/sql/${SITE}_legacy.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}_legacy"
+  else
+    echo "Could not find sql/${SITE}_legacy.sql.gz you may need this if you are doing migrations."
+  fi
 fi
 
 # show the user how to connect
@@ -141,7 +163,6 @@ echo
 echo "If hosted in Linux server is at: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Networks}} {{$p}} -> {{$conf.IPAddress}} {{end}}' ${SITE}_php56_1`"
 echo "If hosted in a VM use your docker-machine or boot2docker IP and this port: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}' ${SITE}_php56_1`"
 
-# launch a console
 echo '
  ________________________________________ 
 / welcome to kafei katli!                \
@@ -161,8 +182,10 @@ echo '
           \____\______/ '
 
 
+# launch a console
 # only go interactive if you have a shell, otherwise assume testing
-if [[ -v TERM ]];
+# turns out it is hard to find interactive status so "not jenkins"
+if [[ ! -v "JENKINS_VERSION" ]];
 then
-  docker exec -ti ${SITE}_php7_1 /bin/bash
+  docker exec -ti ${SITE}_${KATLI_SHELL}_1 /bin/bash
 fi
