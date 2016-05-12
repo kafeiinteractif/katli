@@ -154,6 +154,8 @@ following:
 
 `COMPOSE_PROJECT_NAME=project docker-compose stop`
 
+You can also press Control-C in the terminal where you ran docker-compose up.
+
 Followed by deleting the image which contains your DB:
 
 `docker rm project_db_1`
