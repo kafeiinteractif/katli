@@ -17,6 +17,14 @@ Reasons why you may want to use Katli:
 * to learn docker in a way that doesn't do too much abstraction but takes care
   of the boring routine tasks.
 
+## Requirements
+
+* docker https://docs.docker.com/linux/
+* docker-compose https://docs.docker.com/compose/install/
+* OSX and Windows users may need a Linux-ish host such as docker-machine or boot2docker. Alternatively, there is a native Mac and Windows App that may be useful: https://www.docker.com/docker-news-and-press/docker-released-native-mac-and-windows-apps-optimize-developer-experience
+
+Use your preferred version control and code editor on your host OS. Everything else is provided in the docker containers.
+
 ## Installation
 
 #### 1. Install docker and docker-compose.
@@ -156,6 +164,12 @@ initialize again (and it will be empty).
 Note: we did not set the root password to be optional as this restricts the use
 of root to 'localhost', but the DB in this case is on a separate box that is
 called 'db' to the eyes of Drupal.
+
+## Troubleshooting
+
+* Check the files folder permissions.
+* Review the Drupal status report page.
+* MySQL errors? Consider destroying the image and start it again: `docker rm project_db_1`
 
 ## Support
 
