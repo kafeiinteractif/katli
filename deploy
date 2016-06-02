@@ -23,7 +23,7 @@
 
 SITE=$1
 MYSQL_PWD='my-secret-pw' # also change this value in docker-compose.yml
-SALT=`date | sha256sum` # for Drupal 8. You may want to replace this.
+SALT=`date | shasum` # for Drupal 8. You may want to replace this if your OS does not have shasum installed.
 KATLI_SHELL='php7' # if you have troubles with Drupal 7 use "php56"
 
 # new site (creates placeholders only)
