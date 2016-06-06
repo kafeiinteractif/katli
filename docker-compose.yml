@@ -5,6 +5,9 @@ services:
   php7:
     hostname: katli
     image: kafei/d7p7
+    mem_limit: 256m
+    cpu_shares: 300
+    restart: always
     ports:
       - "80"
     volumes:
@@ -18,6 +21,9 @@ services:
   php56:
     hostname: katli
     image: kafei/d7p56
+    mem_limit: 256m
+    cpu_shares: 300
+    restart: always
     ports:
       - "80"
     volumes:
@@ -31,6 +37,9 @@ services:
   db:
     hostname: db
     image: mysql:latest
+    mem_limit: 512m
+    cpu_shares: 624
+    restart: always
     ports:
       - "3306"
     environment:
