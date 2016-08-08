@@ -93,13 +93,18 @@ Note: project is also the name of your repo, files folder, and settings/project/
 
 #### 5. Now start your environment!
 
-`COMPOSE_PROJECT_NAME=project docker-compose up`
+`./deploy project up`
 
 This will boot up three docker containers: one for the DB, another for php7,
-and one for php5.6.
+and one for php5.6. It will dump the logs directly into the terminal where you
+ran the command.
 
 Once that is done you can now use the `./deploy project` command to get a
 console at the docroot. Drush and Drupal Console are pre-installed.
+
+When you need to stop the containers:
+
+`./deploy project down`
 
 #### 6. Use the force.
 
@@ -152,7 +157,7 @@ the configuration:
 After doing so you may need to shut down your docker-compose instance with the
 following:
 
-`COMPOSE_PROJECT_NAME=project docker-compose stop`
+`./deploy project down`
 
 You can also press Control-C in the terminal where you ran docker-compose up.
 

@@ -7,7 +7,7 @@ services:
     image: kafei/d7p7
     mem_limit: 256m
     cpu_shares: 300
-    restart: always
+    restart: on-failure
     ports:
       - "80"
     volumes:
@@ -23,7 +23,7 @@ services:
     image: kafei/d7p56
     mem_limit: 256m
     cpu_shares: 300
-    restart: always
+    restart: on-failure
     ports:
       - "80"
     volumes:
@@ -39,7 +39,7 @@ services:
     image: mysql:latest
     mem_limit: 512m
     cpu_shares: 624
-    restart: always
+    restart: on-failure
     ports:
       - "3306"
     environment:
