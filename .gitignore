@@ -1,0 +1,17 @@
+# Ignore configuration directory.
+config
+
+# Ignore files directory.
+files
+
+# Ignore repos directory.
+repos
+
+# Ignore settings directory.
+settings
+
+# Ignore sql directory.
+sql
+
+# Ignore src directory.
+src
