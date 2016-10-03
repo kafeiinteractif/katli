@@ -1,10 +1,9 @@
-# Some cool things here.
 version: '2'
 
 services:
   php7:
     hostname: katli
-    image: kafei/d7p7
+    image: kafei/d7cv
     mem_limit: 256m
     cpu_shares: 300
     restart: on-failure
@@ -12,10 +11,12 @@ services:
       - "80"
     volumes:
       - "${PWD}/repos/${COMPOSE_PROJECT_NAME}:/var/www/html"
-      - "${PWD}/settings/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default"
-      - "${PWD}/files/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/files"
-      - "${PWD}/files/${COMPOSE_PROJECT_NAME}_legacy:/var/www/html/sites/default/files_legacy"
-      - "${PWD}/config/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/config"
+      - "${PWD}/repos/${COMPOSE_PROJECT_NAME}:/var/www/web"
+      - "${PWD}/repos/${COMPOSE_PROJECT_NAME}_vendor:/var/www/vendor"
+      - "${PWD}/settings/${COMPOSE_PROJECT_NAME}:/var/www/web/sites/default"
+      - "${PWD}/files/${COMPOSE_PROJECT_NAME}:/var/www/web/sites/default/files"
+      - "${PWD}/files/${COMPOSE_PROJECT_NAME}_legacy:/var/www/legacy/sites/default/files"
+      - "${PWD}/config/${COMPOSE_PROJECT_NAME}:/var/www/web/sites/default/config"
     depends_on:
       - db
   php56:

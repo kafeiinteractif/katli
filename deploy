@@ -156,9 +156,9 @@ then
   if [[ -a ./settings/${SITE}/settings.php ]]
   then
     echo "Running installer:"
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c "cd /var/www/html && /usr/local/bin/drush si standard -y"
+    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c "cd /var/www/web && /usr/local/bin/drush si standard -y"
     echo "Login URL:"
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush uli'
+    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/web && drush uli'
   else
     echo "The settings.php file has not been created. Stop your docker instances and run ./deploy ${SITE} init d8 # or d7 if you wish"
   fi
@@ -173,11 +173,11 @@ then
     echo "Importing db..."
     docker exec -t ${SITE}_db_1 /bin/bash -c "zcat /var/sql/${SITE}.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}"
     echo "Running update hooks..."
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush updb'
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush cr'
+    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/web && drush updb'
+    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/web && drush cr'
     echo
     echo  "Make sure to revert features or drush cim now if appropriate <--"
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush uli'
+    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/web && drush uli'
   else
     echo "Could not find sql/${SITE}.sql.gz"
   fi
