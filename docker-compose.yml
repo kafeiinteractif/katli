@@ -5,7 +5,8 @@ services:
   php7:
     hostname: katli
     image: kafei/d7p7
-    mem_limit: 256m
+    mem_limit: 500m
+    # php is 356m
     cpu_shares: 300
     restart: on-failure
     ports:
@@ -18,22 +19,22 @@ services:
       - "${PWD}/config/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/config"
     depends_on:
       - db
-  php56:
-    hostname: katli
-    image: kafei/d7p56
-    mem_limit: 256m
-    cpu_shares: 300
-    restart: on-failure
-    ports:
-      - "80"
-    volumes:
-      - "${PWD}/repos/${COMPOSE_PROJECT_NAME}:/var/www/html"
-      - "${PWD}/settings/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default"
-      - "${PWD}/files/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/files"
-      - "${PWD}/files/${COMPOSE_PROJECT_NAME}_legacy:/var/www/html/sites/default/files_legacy"
-      - "${PWD}/config/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/config"
-    depends_on:
-      - db
+#  php56:
+#    hostname: katli
+#    image: kafei/d7p56
+#    mem_limit: 256m
+#    cpu_shares: 300
+#    restart: on-failure
+#    ports:
+#      - "80"
+#    volumes:
+#      - "${PWD}/repos/${COMPOSE_PROJECT_NAME}:/var/www/html"
+#      - "${PWD}/settings/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default"
+#      - "${PWD}/files/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/files"
+#      - "${PWD}/files/${COMPOSE_PROJECT_NAME}_legacy:/var/www/html/sites/default/files_legacy"
+#      - "${PWD}/config/${COMPOSE_PROJECT_NAME}:/var/www/html/sites/default/config"
+#    depends_on:
+#      - db
   db:
     hostname: db
     image: mysql:latest

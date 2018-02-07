@@ -1,5 +1,5 @@
 # from https://www.drupal.org/requirements/php#drupalversions
-FROM php:7-apache
+FROM php:7.1-apache-jessie
 
 RUN a2enmod rewrite
 
@@ -20,7 +20,8 @@ RUN { \
 		echo 'opcache.enable_cli=1'; \
 	} > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
-RUN { echo 'memory_limit=256M'; } > /usr/local/etc/php/php.ini
+RUN { echo 'memory_limit=356M'; } > /usr/local/etc/php/php.ini
+RUN { echo 'max_execution_time=125'; } > /usr/local/etc/php/php.ini
 
 WORKDIR /var/www/html
 
