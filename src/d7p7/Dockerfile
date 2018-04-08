@@ -25,7 +25,7 @@ RUN { echo 'max_execution_time=125'; } > /usr/local/etc/php/php.ini
 
 WORKDIR /var/www/html
 
-RUN curl http://files.drush.org/drush.phar -o drush.phar
+RUN curl https://github.com/drush-ops/drush/releases/download/8.1.16/drush.phar -L -o drush.phar
 RUN php drush.phar core-status
 RUN chmod +x drush.phar
 RUN mv drush.phar /usr/local/bin/drush
