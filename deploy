@@ -35,6 +35,9 @@ MYSQL_PWD='my-secret-pw' # also change this value in docker-compose.yml
 SALT=`date | shasum` # for Drupal 8. You may want to replace this if your OS does not have shasum installed.
 KATLI_SHELL='php7' # if you have troubles with Drupal 7 use "php56"
 
+# Docker now seems to like dynamic container names
+D_PHP=`docker ps --format "{{.Names}}" --filter status=running|grep $SITE |grep $KATLI_SHELL`
+D_DB=`docker ps --format "{{.Names}}" --filter status=running|grep $SITE |grep _db_`
 
 if [[ "$2" == "help" || "$1" == "help" ]];
 then
@@ -141,13 +144,13 @@ fi
 # delete DB
 if [[ "$2" == "xx" ]];
 then
-  docker exec -t ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE} --force"
-  docker exec -t ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE}_legacy --force"
+  docker exec -t $D_DB /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE} --force"
+  docker exec -t $D_DB /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root drop ${SITE}_legacy --force"
 fi
 
 # make sure the DB always exists
-docker exec -t ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}" 2>&1 >/dev/null
-docker exec -t ${SITE}_db_1 /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}_legacy" 2>&1 >/dev/null
+docker exec -t $D_DB /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}" 2>&1 >/dev/null
+docker exec -t $D_DB /bin/bash -c "MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysqladmin -u root create ${SITE}_legacy" 2>&1 >/dev/null
 
 # run site install with standard profile
 if [[ "$2" == "si" ]];
@@ -156,9 +159,9 @@ then
   if [[ -a ./settings/${SITE}/settings.php ]]
   then
     echo "Running installer:"
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c "cd /var/www/html && /usr/local/bin/drush si standard -y"
+    docker exec -t $D_PHP /bin/bash -c "cd /var/www/html && /usr/local/bin/drush si standard -y"
     echo "Login URL:"
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush uli'
+    docker exec -t $D_PHP /bin/bash -c 'cd /var/www/html && drush uli'
   else
     echo "The settings.php file has not been created. Stop your docker instances and run ./deploy ${SITE} init d8 # or d7 if you wish"
   fi
@@ -171,20 +174,20 @@ then
   if [[ -a ./sql/${SITE}.sql.gz ]]
   then
     echo "Importing db..."
-    docker exec -t ${SITE}_db_1 /bin/bash -c "zcat /var/sql/${SITE}.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}"
+    docker exec -t $D_DB /bin/bash -c "zcat /var/sql/${SITE}.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}"
     echo "Running update hooks..."
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush updb'
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush cr'
+    docker exec -t $D_PHP /bin/bash -c 'cd /var/www/html && drush updb'
+    docker exec -t $D_PHP /bin/bash -c 'cd /var/www/html && drush cr'
     echo
     echo  "Make sure to revert features or drush cim now if appropriate <--"
-    docker exec -t ${SITE}_${KATLI_SHELL}_1 /bin/bash -c 'cd /var/www/html && drush uli'
+    docker exec -t $D_PHP /bin/bash -c 'cd /var/www/html && drush uli'
   else
     echo "Could not find sql/${SITE}.sql.gz"
   fi
   if [[ -a ./sql/${SITE}_legacy.sql.gz ]]
   then
     echo "NOT Importing legacy..."
-    #docker exec -t ${SITE}_db_1 /bin/bash -c "zcat /var/sql/${SITE}_legacy.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}_legacy"
+    #docker exec -t $D_DB /bin/bash -c "zcat /var/sql/${SITE}_legacy.sql.gz | MYSQL_PWD='${MYSQL_PWD}' /usr/bin/mysql -u root ${SITE}_legacy"
   else
     echo "Could not find sql/${SITE}_legacy.sql.gz you may need this if you are doing migrations."
   fi
@@ -194,7 +197,7 @@ fi
 echo
 echo "PHP 7 Connect info:"
 echo
-echo "If hosted in Linux server is at: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Networks}} {{$p}} -> {{$conf.IPAddress}} {{end}}' ${SITE}_php7_1`"
+echo "If hosted in Linux server is at: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Networks}} {{$p}} -> {{$conf.IPAddress}} {{end}}' ${D_PHP}`"
 echo "If hosted in a VM use your docker-machine or boot2docker IP and this port: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}' ${SITE}_php7_1`"
 echo
 #echo "PHP 5.6 Connect info:"
@@ -226,5 +229,5 @@ echo '
 # turns out it is hard to find interactive status so "not jenkins"
 if [[ ! -v "JENKINS_VERSION" ]];
 then
-  docker exec -ti ${SITE}_${KATLI_SHELL}_1 /bin/bash
+  docker exec -ti $D_PHP /bin/bash
 fi
