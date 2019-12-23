@@ -200,10 +200,10 @@ echo
 echo "If hosted in Linux server is at: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Networks}} {{$p}} -> {{$conf.IPAddress}} {{end}}' ${D_PHP}`"
 echo "If hosted in a VM use your docker-machine or boot2docker IP and this port: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}' ${SITE}_php7_1`"
 echo
-#echo "PHP 5.6 Connect info:"
-#echo
-#echo "If hosted in Linux server is at: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Networks}} {{$p}} -> {{$conf.IPAddress}} {{end}}' ${SITE}_php56_1`"
-#echo "If hosted in a VM use your docker-machine or boot2docker IP and this port: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}' ${SITE}_php56_1`"
+echo "PHP 5.6 Connect info:"
+echo
+echo "If hosted in Linux server is at: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Networks}} {{$p}} -> {{$conf.IPAddress}} {{end}}' ${SITE}_php56_1`"
+echo "If hosted in a VM use your docker-machine or boot2docker IP and this port: `docker inspect --format='{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} -> {{(index $conf 0).HostPort}} {{end}}' ${SITE}_php56_1`"
 
 echo '
  ________________________________________ 
