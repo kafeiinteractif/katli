@@ -1,0 +1,6 @@
+#!/bin/bash
+
+input=$1
+
+gnome-terminal --geometry=80x10 --working-directory=/home/rcw/katli --hide-menubar --window-with-profile=DockerUP -e "./deploy $input up"
+
